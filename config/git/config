@@ -1,0 +1,25 @@
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true
+[core]
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+[merge]
+	conflictStyle = zdiff3
+[alias]
+	st = status -sb
+	lg = log --graph --oneline --decorate -20
+	amend = commit --amend --no-edit
+	# Undo the last commit, keep its changes staged
+	undo = reset --soft HEAD~1
+	pushf = push --force-with-lease
+	recent = branch --sort=-committerdate --format='%(committerdate:relative)%09%(refname:short)'
+	# Delete local branches whose remote branch is gone (merged and deleted PRs)
+	gone = !git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D

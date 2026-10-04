@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# SSTP VPN to the work network. macOS has no built-in SSTP client, so this drives sstpc (brew sstp-client).
+# Settings live in ~/.zshrc.local: SSTP_USER, SSTP_PASSWORD, SSTP_SERVER (host:port),
+# SSTP_ROUTES (space-separated networks to route through the tunnel, optional).
+# Usage: sstp [start|stop|status]
+set -uo pipefail
+
+IFACE=ppp0
+ATTEMPTS=5
+TIMEOUT=10 # seconds to wait for the tunnel on each attempt
+LOG=/tmp/sstp.log
+
+die() { printf '\033[1;31mError:\033[0m %s\n' "$*" >&2; exit 1; }
+
+connected() { ifconfig "$IFACE" 2>/dev/null | grep -q "inet "; }
+
+# The gateway differs between VPN servers; take it from the tunnel's peer address
+gateway() { ifconfig "$IFACE" | awk '/inet /{print $4}'; }
+
+stop() {
+  pgrep -x sstpc >/dev/null || return 0
+  sudo killall sstpc 2>/dev/null
+  for _ in {1..5}; do
+    pgrep -x sstpc >/dev/null || return 0
+    sleep 1
+  done
+  sudo killall -9 sstpc 2>/dev/null
+  return 0
+}
+
+start() {
+  [[ -n ${SSTP_USER:-} && -n ${SSTP_PASSWORD:-} && -n ${SSTP_SERVER:-} ]] ||
+    die "credentials not set. Add to ~/.zshrc.local and restart the shell:
+  export SSTP_USER=... SSTP_PASSWORD=... SSTP_SERVER=host:port SSTP_ROUTES=\"net/mask ...\""
+  command -v sstpc >/dev/null || die "sstpc not found (brew sstp-client)"
+
+  # Ask for the sudo password now, not in the middle of the progress dots
+  sudo -v || exit 1
+  stop
+  : >"$LOG"
+
+  printf 'Connecting'
+  for ((a = 1; a <= ATTEMPTS; a++)); do
+    # nohup: keep the tunnel up after the terminal is closed. The log is written as the user, not root
+    # No usepeerdns: the pushed DNS is sometimes down, and macOS makes it primary, breaking all lookups
+    # shellcheck disable=SC2024
+    sudo nohup sstpc --log-level 5 --cert-warn \
+      --user "$SSTP_USER" --password "$SSTP_PASSWORD" "$SSTP_SERVER" \
+      noauth noipdefault >>"$LOG" 2>&1 &
+    for ((s = 0; s < TIMEOUT; s++)); do
+      sleep 1
+      printf '.'
+      connected && break 2
+    done
+    # This attempt hung; kill it before starting the next one
+    stop
+  done
+  echo
+  connected || die "no connection after $ATTEMPTS attempts, see $LOG"
+
+  local gw net
+  gw="$(gateway)"
+  for net in ${SSTP_ROUTES:-}; do
+    route -n get "$net" 2>/dev/null | grep -q "gateway: $gw" && continue
+    # change: a route left from a previous session may point to an old gateway
+    sudo route -qn add -net "$net" "$gw" >/dev/null 2>&1 ||
+      sudo route -qn change -net "$net" "$gw" >/dev/null
+  done
+  status
+}
+
+status() {
+  if connected; then
+    echo "Connected: $(ifconfig "$IFACE" | awk '/inet /{print $2}')"
+  else
+    echo "Disconnected"
+    return 1
+  fi
+}
+
+case "${1:-start}" in
+  start) start ;;
+  stop) stop && echo "Disconnected" ;;
+  status) status ;;
+  *) die "usage: sstp [start|stop|status]" ;;
+esac

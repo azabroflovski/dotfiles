@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# Work shortcuts. Addresses and ports live outside the repo:
+# VPN settings in ~/.zshrc.local (see bin/sstp); hosts in ~/.ssh/config: `Host hayot-bastion`,
+# environments as `Host hayot-dev` / `Host hayot-prod`.
+# Usage: hayot help [--full]
+set -uo pipefail
+
+# Sibling scripts by path, so this works without ~/dotfiles/bin on PATH
+sstp() { "${BASH_SOURCE[0]%/*}/sstp" "$@"; }
+
+die() { printf '\033[1;31mError:\033[0m %s\n' "$*" >&2; exit 1; }
+
+# Bold section headers, only on a terminal
+if [[ -t 1 ]]; then b=$'\033[1m' r=$'\033[0m'; else b='' r=''; fi
+
+help() {
+  cat <<HELP
+Hayot VPN and dev/prod environment access
+
+${b}Usage${r}
+  hayot <command> [args]
+
+${b}Commands${r}
+  vpn [start|stop|status]   Manage the VPN (default: start)
+  ssh                       Open the bastion menu to pick a server
+  forward <dev|prod>        Shell on an environment with its ports forwarded to localhost
+  help [--full]             Show help; --full adds setup and troubleshooting
+
+${b}Examples${r}
+  hayot vpn
+  hayot ssh
+  hayot forward dev
+HELP
+  [[ ${1:-} == --full ]] || { echo; echo "Run 'hayot help --full' for setup and troubleshooting."; return; }
+  cat <<HELP
+
+${b}Notes${r}
+  Forwards close when you exit the environment shell. prod asks to confirm.
+  Dev and prod use the same local ports: localhost:5432 is whichever environment you connected to last.
+
+${b}Setup${r} (addresses, login and password: ask DevOps)
+  1. brew install sstp-client
+     Put hayot and sstp (github.com/azabroflovski/dotfiles, bin/) in one dir on PATH.
+
+  2. ~/.zshrc, then restart the terminal:
+       export SSTP_USER=... SSTP_PASSWORD=... SSTP_SERVER=host:port
+       export SSTP_ROUTES="net/mask net/mask"   # networks to reach through the VPN
+
+  3. ~/.ssh/config (chmod 600), one block per host, LOGIN is yours:
+       Host hayot-bastion
+         HostName <bastion>
+       Host hayot-dev
+         HostName <bastion>
+         User LOGIN@<server>:SSH:LOGIN.auth:LOGIN
+         ExitOnForwardFailure yes
+         LocalForward 5432 <server>:5432
+         LocalForward ...
+       Host hayot-prod
+         ...
+
+${b}Troubleshooting${r}
+  VPN fails             log in /tmp/sstp.log, usually a wrong login or password
+  VPN up, host not      route -n get <host> must show interface: ppp0;
+  reachable             add its network to SSTP_ROUTES, then hayot vpn
+  port already in use   something local holds it (often Postgres on 5432)
+HELP
+}
+
+# One-line error with a pointer to help, like gh/cargo do
+usage() { die "$1"$'\n'"Run 'hayot help' for usage."; }
+
+require_host() {
+  # ssh -G echoes the alias back as hostname when ~/.ssh/config has no such Host
+  [[ $(ssh -G "$1" 2>/dev/null | awk '/^hostname /{print $2}') != "$1" ]] ||
+    die "no 'Host $1' in ~/.ssh/config. See 'hayot help --full'"
+}
+
+# Don't restart a working tunnel
+ensure_vpn() { sstp status >/dev/null || sstp start || exit 1; }
+
+bastion() {
+  [[ $# -eq 0 ]] || usage "ssh takes no arguments: the bastion shows a menu"
+  require_host hayot-bastion
+  ensure_vpn
+  exec ssh hayot-bastion
+}
+
+forward() {
+  local env="${1:-}" host
+  [[ $env == dev || $env == prod ]] || usage "expected dev or prod, got '${env}'"
+  host="hayot-$env"
+  require_host "$host"
+
+  if [[ $env == prod ]]; then
+    read -rp $'\033[1;31mPROD\033[0m. Continue? [y/N] ' answer
+    [[ $answer == y ]] || exit 1
+  fi
+
+  ensure_vpn
+  # Forwards from the config stay open while this shell on the environment is open
+  exec ssh "$host"
+}
+
+case "${1:-help}" in
+  vpn) shift; sstp "$@" ;;
+  ssh) shift; bastion "$@" ;;
+  forward) shift; forward "$@" ;;
+  help | -h | --help) shift; help "$@" ;;
+  *) usage "unknown command '$1'" ;;
+esac

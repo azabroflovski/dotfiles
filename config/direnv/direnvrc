@@ -1,0 +1,1 @@
+source /etc/profiles/per-user/$USER/share/nix-direnv/direnvrc

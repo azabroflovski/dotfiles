@@ -1,0 +1,19 @@
+[general]
+import = ["~/.config/alacritty/themes/bathory.toml"]
+
+[window]
+opacity = 0.78
+blur = true
+padding = { x = 6, y = 6 }
+# Spread leftover space evenly instead of leaving it all at the bottom/right
+dynamic_padding = true
+
+[font]
+normal = { family = "JetBrainsMono Nerd Font" }
+size = 14
+
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
