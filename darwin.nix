@@ -31,7 +31,10 @@
       cleanup = "uninstall";
     };
     taps = [ "nikitabobko/tap" ];
-    brews = [ "sstp-client" ]; # SSTP VPN, see bin/sstp (not in nixpkgs for darwin)
+    brews = [
+      "sstp-client" # SSTP VPN, see bin/sstp (not in nixpkgs for darwin)
+      "mcp-publisher"
+    ];
     casks = [
       "nikitabobko/tap/aerospace"
       "claude-code"
