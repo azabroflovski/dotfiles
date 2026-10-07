@@ -37,6 +37,7 @@
       "claude-code"
       "google-chrome"
       "telegram"
+      "zoom"
     ];
   };
 
