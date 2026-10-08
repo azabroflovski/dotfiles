@@ -52,6 +52,7 @@ ${b}Setup${r} (addresses, login and password: ask DevOps)
        Host hayot-dev
          HostName <bastion>
          User LOGIN@<server>:SSH:LOGIN.auth:LOGIN
+         ForwardAgent yes
          ExitOnForwardFailure yes
          LocalForward 5432 <server>:5432
          LocalForward ...
@@ -63,6 +64,8 @@ ${b}Troubleshooting${r}
   VPN up, host not      route -n get <host> must show interface: ppp0;
   reachable             add its network to SSTP_ROUTES, then hayot vpn
   port already in use   something local holds it (often Postgres on 5432)
+  "Failed to connect    the bastion logs in to the server with your key via the agent:
+  to secondary target"  add ForwardAgent yes to the host, check ssh-add -l
 HELP
 }
 
