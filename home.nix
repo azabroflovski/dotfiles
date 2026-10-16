@@ -64,6 +64,17 @@ in
     sops
     age
 
+    # Network
+    trippy # ping + traceroute TUI
+    gping
+    doggo # dig replacement
+    bandwhich # per-process bandwidth, needs sudo
+    iperf3
+    nmap
+    termshark # TUI for tshark (wireshark-cli)
+    websocat
+    croc # file transfer by code phrase
+
     # C (lldb comes from Xcode Command Line Tools: nix's build can't attach without Apple's signed debugserver)
     clang-tools
     cmake
