@@ -19,6 +19,8 @@ in
     bun
     python3
     uv
+    lua5_4
+    lua54Packages.luarocks
     go
     rustup
     zig
