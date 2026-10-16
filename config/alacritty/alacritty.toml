@@ -2,7 +2,7 @@
 import = ["~/.config/alacritty/themes/bathory.toml"]
 
 [window]
-opacity = 0.78
+opacity = 0.84
 blur = true
 padding = { x = 6, y = 6 }
 # Spread leftover space evenly instead of leaving it all at the bottom/right
