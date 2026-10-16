@@ -75,6 +75,22 @@ in
     websocat
     croc # file transfer by code phrase
 
+    # Fun
+    aalib # aafire
+    lavat
+    cbonsai
+    asciiquarium
+    weathr
+    astroterm
+    cmatrix
+    genact
+    sl
+    cowsay
+    fortune
+    lolcat
+    vitetris
+    sssnake
+
     # C (lldb comes from Xcode Command Line Tools: nix's build can't attach without Apple's signed debugserver)
     clang-tools
     cmake

@@ -53,6 +53,7 @@ alias iexm="iex -S mix"
 # Show off on a fresh terminal window, but not in tmux panes, nvim terminals or nested shells
 if [[ -z $TMUX && -z $NVIM && $SHLVL -eq 1 ]]; then
   fastfetch
+  fortune -s | cowsay | lolcat
 fi
 
 # Must be sourced last
