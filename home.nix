@@ -86,7 +86,7 @@ in
     genact
     sl
     cowsay
-    fortune
+    fortune-kind # fortune-mod needs recode, which is broken on darwin
     lolcat
     vitetris
     sssnake

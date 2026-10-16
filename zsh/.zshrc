@@ -49,6 +49,12 @@ alias ports="lsof -iTCP -sTCP:LISTEN -nP"
 alias reload="exec zsh"
 alias lt="eza --tree --level=2 --git-ignore"
 mkcd() { mkdir -p "$1" && cd "$1"; }
+# Rainbow cow with a short quote (fortune-kind's -n limit isn't reliable, so retry until it fits)
+moo() {
+  local quote
+  repeat 20; do quote=$(fortune -n 80); (( ${#quote} <= 80 )) && break; done
+  print -r -- "$quote" | cowsay | lolcat
+}
 
 alias dc="docker compose"
 alias iexm="iex -S mix"
@@ -59,7 +65,6 @@ alias iexm="iex -S mix"
 # Show off on a fresh terminal window, but not in tmux panes, nvim terminals or nested shells
 if [[ -z $TMUX && -z $NVIM && $SHLVL -eq 1 ]]; then
   fastfetch
-  fortune -s | cowsay | lolcat
 fi
 
 # Must be sourced last
