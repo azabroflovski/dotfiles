@@ -34,6 +34,7 @@
     brews = [
       "sstp-client" # SSTP VPN, see bin/sstp (not in nixpkgs for darwin)
       "mcp-publisher"
+      "mole" # Mac cleaner, `mo` (nixpkgs' mole is an unrelated SSH tunnel tool)
     ];
     casks = [
       "nikitabobko/tap/aerospace"
