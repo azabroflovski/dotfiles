@@ -88,8 +88,10 @@ in
     zsh-syntax-highlighting
     tmux
 
-    # GUI (the alacritty cask is disabled in Homebrew: it fails Gatekeeper)
+    # GUI (the alacritty and mpv casks are disabled in Homebrew: they fail Gatekeeper)
     alacritty
+    mpv
+    yt-dlp # lets mpv play YouTube and other URLs
 
     # Editor
     neovim
