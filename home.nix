@@ -101,6 +101,7 @@ in
     nil
     statix # linter, used by LazyVim's lang.nix extra
     nix-output-monitor
+    nvd # package diff between generations, used by `rebuild`
 
     # Docker (colima is the VM; compose/buildx are linked as CLI plugins below)
     colima

@@ -21,8 +21,14 @@ alias ls="eza"
 alias ll="eza -la"
 alias cat="bat --paging=never"
 alias vim="nvim"
-# Return darwin-rebuild's exit code, not nom's
-rebuild() { sudo darwin-rebuild switch --flake ~/dotfiles |& nom; return ${pipestatus[1]}; }
+# Return darwin-rebuild's exit code, not nom's; on success show what changed vs the previous generation
+rebuild() {
+  local old=$(readlink /run/current-system)
+  sudo darwin-rebuild switch --flake ~/dotfiles |& nom
+  local rc=${pipestatus[1]}
+  (( rc == 0 )) && nvd diff "$old" /run/current-system
+  return $rc
+}
 # Second Claude Code with its own login, settings and history (work account); `claude` stays personal
 alias claude-work="CLAUDE_CONFIG_DIR=~/.claude-work claude"
 
