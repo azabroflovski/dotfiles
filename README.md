@@ -24,7 +24,7 @@ Want to use it? Fork, edit `user.nix`, run `install.sh`.
 
 - **Languages:** Elixir 1.20 / Erlang 28, Go, Rust (rustup), Zig, C (Apple clang, clangd), Python 3.14 + uv, Bun, Node 24.
 - **Shell:** zsh, pure, atuin, fzf, zoxide, autosuggestions, syntax highlighting.
-- **Apps:** AeroSpace, Chrome, Telegram, Claude Code. Homebrew casks.
+- **Apps:** AeroSpace, Chrome, Telegram, Claude Code, Discord, Steam. Homebrew casks.
 - **Docker:** [Colima](https://github.com/abiosoft/colima).
 - **Tunnels:** [cloudflared](https://github.com/cloudflare/cloudflared) to expose a local server over a public URL, e.g. for webhooks: `cloudflared tunnel --url localhost:3000`.
 - **VPN:** `sstp start` (or just `sstp`, from `bin/sstp`) brings up the work SSTP tunnel and routes to the networks in `SSTP_ROUTES`; `sstp stop`, `sstp status`. macOS has no SSTP client, so it drives `sstpc` from Homebrew. Credentials go to `~/.zshrc.local`.

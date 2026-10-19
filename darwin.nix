@@ -39,7 +39,9 @@
     casks = [
       "nikitabobko/tap/aerospace"
       "claude-code"
+      "discord"
       "google-chrome"
+      "steam"
       "telegram"
       "zoom"
     ];
